@@ -1,0 +1,97 @@
+html, body, #app {
+    background: black;
+}
+
+.title {
+    background: #f31738;
+}
+
+.card-sort {
+    margin-bottom: 20px;
+    background: black;
+    color:white;
+}
+
+html h1 {
+    color: white;
+}
+
+.game-card {
+    float: left;
+    height: 400px;
+}
+
+.card-name {
+    width: 100%;
+    color: white;
+    font-size: 20px;
+    float: left;
+    border-radius: 8px 8px 0 0;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.card-img {
+    width: 100%;
+}
+
+.card-info {
+    width: 100%;
+    border-radius: 0 0 8px 8px;
+    float: left;
+    font-size: 20px;
+    color: white;
+    height: 30px;
+}
+
+.card-health {
+    float: left;
+    text-align:right;
+}
+
+.card-armor {
+    float: left;
+    text-align:center;
+}
+
+.card-attack {
+    float: left;
+}
+
+.avatar-img{
+    height: 25px;
+    width: 25px;
+    float: left;
+    margin-right: 10px;
+    background-color: #201d20;
+    border-radius: 15px;
+    margin-top: 2px;
+}
+
+.avatar-img img {
+    width: 100%;
+    vertical-align: baseline;
+    height: 20px;
+    width: 20px;
+    margin-left: 2px;
+}
+
+.card-red {
+    background: #66222a;
+}
+
+.card-blue {
+    background: #214e67;
+}
+
+.card-green {
+    background: #3d622b;
+}
+
+.card-black {
+    background: #262428;
+}
+
+a {
+    cursor: pointer;
+}

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/my.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+  </head>
+
+  <div id="app">
+    <div class="container">
+      <div class="card-sort col-md-12">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="row">
+              <h2>General</h2>
+            </div>
+            <div class="row">
+              <a @click="sort('All', '')" class="col-md-2">
+                View All
+              </a>
+              <a @click="sort('type', 'hero')" class="col-md-2">
+                Heroes
+              </a>
+              <a @click="sort('type', 'spell')" class="col-md-2">
+                Spell
+              </a>
+              <a @click="sort('type', 'creep')" class="col-md-2">
+                Creeps
+              </a>              
+              <a @click="sort('type', 'improvement')" class="col-md-2">
+                Improv.
+              </a>
+              <a @click="sort('type', 'item')" class="col-md-2">
+                Items
+              </a>
+            </div>
+            <div class="row">
+              <h2>Card Stats</h2>
+            </div>
+            <div class="row">
+              <div class="col-md-4">
+                <span>Mana:</span>
+                <select @change="onChange('mana', $event)">
+                  <option v-for="option in 10" v-bind:value="option">
+                    {{ option }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <span>Health:</span>
+                <select @change="onChange('health', $event)">
+                    <option v-for="option in 25" v-bind:value="option">
+                      {{ option }}
+                    </option>
+                  </select>
+              </div>
+              <div class="col-md-4">
+                <span>Attack:</span>
+                <select @change="onChange('attack', $event)">
+                    <option v-for="option in 25" v-bind:value="option">
+                      {{ option }}
+                    </option>
+                  </select>
+              </div>                              
+            </div>
+            <div class="row">
+              <h2>Search</h2>
+            </div>
+            <div class="row">
+                <span class="col-md-4">Card name</span><input class="col-md-8" v-model="cardName" placeholder="Card name">
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="row">
+              <h2 class="col-md-12">Rarity</h2>
+            </div>
+            <div class="row">
+              <a @click="sort('rarity', 'basic')" class="col-md-3">
+                Basic
+              </a>
+              <a @click="sort('rarity', 'common')" class="col-md-3">
+                Common
+              </a>
+              <a @click="sort('rarity', 'uncommon')" class="col-md-3">
+                Uncom.
+              </a>
+              <a @click="sort('rarity', 'rare')" class="col-md-3">
+                Rare
+              </a>
+            </div>
+            <div class="row">
+                <h2 class="col-md-12">Color</h2>
+            </div>
+            <div class="row">                
+              <a @click="sort('color', 'red')" class="col-md-3">
+                Red
+              </a>
+              <a @click="sort('color', 'blue')" class="col-md-3">
+                Blue
+              </a>
+              <a @click="sort('color', 'black')" class="col-md-3">
+                Black
+              </a>
+              <a @click="sort('color', 'green')" class="col-md-3">
+                Green
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="title">
+      <div class="container">
+        <h1 class="col-md-12">Artifact cards ({{ sortedCardsList.length }})</h1>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <a v-bind:href="card.links.redmist" v-for="card in sortedCards" class="col-md-3 game-card">
+          <span class="card-name" v-bind:class="cardColor(card.color)">
+            <span v-if="card.cost.mana">{{ card.cost.mana }}</span>
+            <div class="avatar-img" v-if="card.images.avatar">
+              <img v-bind:src="card.images.avatar" />
+            </div> 
+            {{ card.name }}
+          </span>
+          <img class="card-img" v-bind:src="card.images.full" />
+          <div class="card-info" v-bind:class="cardColor(card.color)">
+            <span v-if="card.stats.health" class="col-md-4 card-attack">ATK:{{ card.stats.attack }}</span>
+            <span v-if="card.stats.health" class="col-md-4 card-armor">DEF:{{ card.stats.armor }}</span>
+            <span v-if="card.stats.health" class="col-md-4 card-health">HP:{{ card.stats.health }}</span>
+          </div>
+        </a>
+      </div>
+    </div>
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        <li @click="updatePage(page - 1)" class="page-item"><a class="page-link" href="#">Previous</a></li>
+        <li class="page-item" v-for="page in pageCount">
+          <a @click="updatePage(page)" class="page-link" href="#">
+            {{page}}
+          </a>
+        </li>
+        <li @click="updatePage(page + 1)" class="page-item"><a class="page-link" href="#">Next</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <script>
+    var cardByPage = 24;
+
+  window.onload=function(){
+    var app = new Vue({
+      el: '#app',
+      data: {
+        cards: [],
+        sortType:'',
+        sortRarity:'',
+        sortMana:'',
+        sortHealth:'',
+        sortAttack:'',
+        sortColor:'',
+        cardName:'',
+        page:1,
+      },
+      mounted() {
+        axios.get("https://public.redmist.gg/v1/cards")
+        .then(response => {this.cards = response.data.cards})
+      },
+      methods:{
+        sort:function(key, value) {
+          switch (key) {
+            case "type":
+              this.sortType = value;
+              break;
+            case "rarity":
+              this.sortRarity = value;
+              break;
+            case "color":
+              this.sortColor = value;
+              break;
+            default:
+              this.sortType = "";
+              this.sortRarity = "";
+              this.sortMana = "";
+              this.sortHealth = "";
+              this.sortAttack = "";
+              this.sortColor = "";
+            break;
+          }
+          this.page=1;
+        },
+        onChange:function(key, value) {
+          console.log(event.target.value);
+          switch (key) {
+            case "mana":
+              this.sortMana = event.target.value;
+              break;
+            case "health":
+              this.sortHealth = event.target.value;
+              break;
+            case "attack":
+              this.sortAttack = event.target.value;
+              break;
+          }
+        },
+        updatePage:function(newPage) {
+          this.page=newPage;
+        },
+        cardColor:function(cardColor) {
+            if (cardColor == "red") {
+              return "card-red";
+            }
+            else if (cardColor == "blue") {
+              return "card-blue";
+            }
+            else if (cardColor == "green") {
+              return "card-green";
+            }
+            else if (cardColor == "black") {
+              return "card-black";
+            }
+        },
+      },
+      computed:{
+        sortedCardsList() {
+          return this.cards.filter((a,b) => {
+            var returnValue = true;
+
+            if (this.sortType != "" && a["type"] != this.sortType) {
+              returnValue &= false;
+            }
+
+            if (this.sortRarity != "" && a["rarity"] != this.sortRarity) {
+              returnValue &= false;
+            }
+
+            if (this.sortMana != "" && a["cost"]["mana"] != this.sortMana) {
+              returnValue &= false;
+            }
+
+            if (this.sortHealth != "" && a["stats"]["health"] != this.sortHealth) {
+              returnValue &= false;
+            }
+
+            if (this.sortAttack != "" && a["stats"]["attack"] != this.sortAttack) {
+              returnValue &= false;
+            }
+
+            if (this.sortColor != "" && a["color"] != this.sortColor) {
+              returnValue &= false;
+            }
+
+            if (!a["name"].toLowerCase().includes(this.cardName.toLowerCase())) {
+              returnValue &= false;
+            }
+
+            return returnValue;
+          });
+        },
+        sortedCards() {
+          return this.sortedCardsList.filter((row,index) => {
+            if((this.page - 1) * cardByPage <= index &&
+              index < this.page * cardByPage)
+              return true;
+            return false;
+          });
+        },
+        pageCount() {
+          var pageNumber = 1;
+          if (this.sortedCardsList.length > 0) {
+            pageNumber = Math.floor((this.sortedCardsList.length / cardByPage) + 1);
+          }
+          return pageNumber;
+        },
+      }
+    });
+  }
+  </script>
+  <script src="js/vue.min.js"></script>
+  <script src="js/axios.min.js"></script>
+</html>
